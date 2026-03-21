@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Earthquake Monitor Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+
+  <script>
+    (function () {
+      try {
+        const stored = localStorage.getItem("theme");
+        const theme =
+          stored === "light" || stored === "dark"
+            ? stored
+            : window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (err) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Replace these with your actual Firebase project settings
+   const firebaseConfig = {
+  apiKey: "AIzaSyDy2zFwAIYCNKRyTHvrFhi1fNyhiVzNprM",
+  authDomain: "earth-quake-vibration-detector.firebaseapp.com",
+  databaseURL: "https://earth-quake-vibration-detector-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "earth-quake-vibration-detector",
+  storageBucket: "earth-quake-vibration-detector.firebasestorage.app",
+  messagingSenderId: "763150314839",
+  appId: "1:763150314839:web:bef92290885192ec2c6212",
+  measurementId: "G-MZXJSMGHVM"
+};
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      window.firebaseDB = getDatabase(app);
+      window.dispatchEvent(new Event("firebase-ready"));
+    } catch (error) {
+      console.error("Firebase initialization failed:", error);
+      window.firebaseInitError = error;
+      window.dispatchEvent(new Event("firebase-init-error"));
+    }
+  </script>
+</head>
+<body>
+  <div class="page-bg" aria-hidden="true"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo-mark" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 3L4 9v12h16V9l-8-6z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+            <path d="M9 14h6M9 18h6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Earthquake Vibration Detector</h1>
+          <p class="subtitle">Live monitoring dashboard using ESP32 + Firebase</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="theme-toggle"
+          id="themeToggle"
+          aria-label="Switch to dark theme"
+          title="Toggle theme"
+        >
+          <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          </span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </span>
+        </button>
+
+        <div class="device-box">
+          <span class="label">Device</span>
+          <span id="deviceId">esp32_01</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="alert-section">
+      <div id="mainAlert" class="main-alert safe-alert">
+        <h2 id="alertTitle">SAFE</h2>
+        <p id="alertMessage">Waiting for live data...</p>
+      </div>
+      <p id="connectionStatus" class="connection-status">Connecting to Firebase...</p>
+    </section>
+
+    <section class="cards">
+      <div class="card">
+        <h3>Current Level</h3>
+        <p id="level" class="value safe">SAFE</p>
+      </div>
+
+      <div class="card">
+        <h3>Status</h3>
+        <p id="status" class="value-text">NO VIBRATION</p>
+      </div>
+
+      <div class="card">
+        <h3>Vibration</h3>
+        <p id="vibration" class="value-text">SAFE</p>
+      </div>
+
+      <div class="card">
+        <h3>Trigger Count (5s)</h3>
+        <p id="triggerCount" class="value-number">0</p>
+      </div>
+
+      <div class="card">
+        <h3>Total Event Count</h3>
+        <p id="totalCount" class="value-number">0</p>
+      </div>
+
+      <div class="card">
+        <h3>Updated At</h3>
+        <p id="updatedAt" class="value-small">-</p>
+      </div>
+    </section>
+
+    <section class="chart-section" aria-labelledby="live-chart-heading">
+      <div class="section-header">
+        <h2 id="live-chart-heading">Live Signals</h2>
+      </div>
+      <p class="chart-subtitle">
+        Trigger count in the 5-second window and vibration state update as new readings arrive.
+      </p>
+      <div class="chart-panel">
+        <canvas id="liveChart" role="img" aria-label="Live chart of trigger count and vibration over time"></canvas>
+      </div>
+    </section>
+
+    <section class="history-section">
+      <div class="section-header">
+        <h2>Recent History</h2>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Level</th>
+              <th>Status</th>
+              <th>Vibration</th>
+              <th>Trigger Count</th>
+              <th>Total Count</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable">
+            <tr>
+              <td colspan="7">No data available</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      function getStoredTheme() {
+        try {
+          const s = localStorage.getItem("theme");
+          if (s === "light" || s === "dark") return s;
+        } catch (e) {}
+        return window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+      }
+
+      function applyThemeToDom(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        const btn = document.getElementById("themeToggle");
+        if (btn) {
+          const goDark = theme === "light";
+          btn.setAttribute(
+            "aria-label",
+            goDark ? "Switch to dark theme" : "Switch to light theme"
+          );
+          btn.title = goDark ? "Switch to dark theme" : "Switch to light theme";
+        }
+      }
+
+      function setDashboardTheme(theme) {
+        if (theme !== "light" && theme !== "dark") return;
+        try {
+          localStorage.setItem("theme", theme);
+        } catch (e) {}
+        applyThemeToDom(theme);
+        window.dispatchEvent(new CustomEvent("dashboard-theme"));
+      }
+
+      applyThemeToDom(getStoredTheme());
+
+      const toggle = document.getElementById("themeToggle");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          const cur = document.documentElement.getAttribute("data-theme") || "light";
+          const next = cur === "dark" ? "light" : "dark";
+          setDashboardTheme(next);
+        });
+      }
+    })();
+  </script>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
