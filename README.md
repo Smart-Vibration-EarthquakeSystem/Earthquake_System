@@ -54,20 +54,8 @@ The microcontroller processes vibration data and sends it to the cloud, where it
 
 ## 🌐 Deploy the dashboard on Render
 
-The folder `web-dashboard/` is a static site (HTML, CSS, JS). You can host it on [Render](https://render.com) for free.
-
-### Option A — Blueprint (`render.yaml`)
-
-1. Push this repository to GitHub (or GitLab / Bitbucket).
-2. In Render: **New** → **Blueprint** → connect the repo → confirm the service from `render.yaml`.
-3. Deploy. Your site will be at `https://<service-name>.onrender.com`.
-
-### Option B — Static Site (dashboard UI)
-
-1. **New** → **Static Site** → connect the repo.
-2. **Root directory**: leave empty (repo root) or set **Publish directory** to `web-dashboard`.
-3. **Build command**: leave empty (nothing to compile).
-4. **Publish directory**: `web-dashboard` (path relative to repo root).
+## 🌐 Live Demo
+https://earthquake-system.onrender.com
 
 ### Firebase
 
