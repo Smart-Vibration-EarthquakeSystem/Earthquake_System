@@ -52,6 +52,30 @@ The microcontroller processes vibration data and sends it to the cloud, where it
 4. Set up Firebase configuration
 5. Open the web dashboard (`index.html`)
 
+## 🌐 Deploy the dashboard on Render
+
+The folder `web-dashboard/` is a static site (HTML, CSS, JS). You can host it on [Render](https://render.com) for free.
+
+### Option A — Blueprint (`render.yaml`)
+
+1. Push this repository to GitHub (or GitLab / Bitbucket).
+2. In Render: **New** → **Blueprint** → connect the repo → confirm the service from `render.yaml`.
+3. Deploy. Your site will be at `https://<service-name>.onrender.com`.
+
+### Option B — Static Site (dashboard UI)
+
+1. **New** → **Static Site** → connect the repo.
+2. **Root directory**: leave empty (repo root) or set **Publish directory** to `web-dashboard`.
+3. **Build command**: leave empty (nothing to compile).
+4. **Publish directory**: `web-dashboard` (path relative to repo root).
+
+### Firebase
+
+- Realtime Database rules must allow the reads your dashboard needs (same as when testing locally).
+- If you use **Firebase Authentication**, add your Render hostname (e.g. `earthquake-monitor-dashboard.onrender.com`) under **Firebase Console → Project settings → Authorized domains**.
+
+`firebase-init.js` in `web-dashboard` already contains your web app config; no Render env vars are required for Firebase client SDK usage.
+
 ## 👥 Team Members
 
 * KUHANESAN D.

@@ -1,0 +1,15 @@
+# Render Blueprint: static web dashboard
+# https://render.com/docs/blueprint-spec
+#
+# After deploy, add your *.onrender.com URL under Firebase Console →
+# Project settings → Authorized domains (if you use Firebase Auth).
+
+services:
+  - type: web
+    name: earthquake-monitor-dashboard
+    runtime: static
+    plan: free
+    staticPublishPath: ./web-dashboard
+    buildFilter:
+      paths:
+        - web-dashboard/**
