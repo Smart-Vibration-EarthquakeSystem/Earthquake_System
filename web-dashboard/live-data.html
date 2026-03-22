@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Earthquake Monitor</title>
+  <title>Live Data | Earthquake Monitor</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,7 +34,7 @@
 
   <script type="module" src="firebase-init.js"></script>
 </head>
-<body data-page="dashboard">
+<body data-page="live-data">
   <div class="page-bg" aria-hidden="true"></div>
 
   <header class="header-bar" data-header-bar>
@@ -54,6 +54,7 @@
           </div>
           <div class="header-bar__titles">
             <h1 class="header-bar__title">Earthquake Vibration Detector</h1>
+            <p class="header-bar__subtitle">Live monitoring dashboard using ESP32 + Firebase</p>
           </div>
         </a>
 
@@ -72,10 +73,10 @@
         <nav class="header-bar__nav" id="headerPrimaryNav" aria-label="Primary dashboard">
           <ul class="header-bar__nav-list">
             <li>
-              <a class="header-bar__nav-link is-active" href="index.html" data-nav-target="top">Dashboard</a>
+              <a class="header-bar__nav-link" href="index.html" data-nav-target="top">Dashboard</a>
             </li>
             <li>
-              <a class="header-bar__nav-link" href="live-data.html" data-nav-target="live-data">Live Data</a>
+              <a class="header-bar__nav-link is-active" href="live-data.html" data-nav-target="live-data">Live Data</a>
             </li>
             <li>
               <a class="header-bar__nav-link" href="analytics.html" data-nav-target="analytics">Analytics</a>
@@ -165,41 +166,17 @@
   </header>
 
   <div class="container" id="top">
-    <h1 class="page-main-title">Dashboard</h1>
-    <p class="chart-subtitle" style="margin-top: -0.5rem; margin-bottom: 1.25rem">
-      Current readings from Firebase live path. Open <a href="alerts.html">Alerts</a> for the status banner or
-      <a href="live-data.html">Live Data</a> for the rolling chart.
-    </p>
+    <h1 class="page-main-title">Live Data</h1>
 
-    <section class="cards" aria-label="Current sensor readings">
-      <div class="card">
-        <h3>Current Level</h3>
-        <p id="level" class="value safe">SAFE</p>
+    <section class="chart-section" id="live-data" aria-labelledby="live-chart-heading">
+      <div class="section-header">
+        <h2 id="live-chart-heading">Live Signals</h2>
       </div>
-
-      <div class="card">
-        <h3>Status</h3>
-        <p id="status" class="value-text">NO VIBRATION</p>
-      </div>
-
-      <div class="card">
-        <h3>Vibration</h3>
-        <p id="vibration" class="value-text">SAFE</p>
-      </div>
-
-      <div class="card">
-        <h3>Trigger Count</h3>
-        <p id="triggerCount" class="value-number">0</p>
-      </div>
-
-      <div class="card">
-        <h3>Total Event Count</h3>
-        <p id="totalCount" class="value-number">0</p>
-      </div>
-
-      <div class="card">
-        <h3>Updated At</h3>
-        <p id="updatedAt" class="value-small">-</p>
+      <p class="chart-subtitle">
+        Trigger count and vibration state update as new readings arrive from Firebase.
+      </p>
+      <div class="chart-panel">
+        <canvas id="liveChart" role="img" aria-label="Live chart of trigger count and vibration over time"></canvas>
       </div>
     </section>
   </div>

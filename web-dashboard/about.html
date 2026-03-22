@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Earthquake Monitor</title>
+  <title>About | Earthquake Monitor</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,7 +34,7 @@
 
   <script type="module" src="firebase-init.js"></script>
 </head>
-<body data-page="dashboard">
+<body data-page="about">
   <div class="page-bg" aria-hidden="true"></div>
 
   <header class="header-bar" data-header-bar>
@@ -54,6 +54,7 @@
           </div>
           <div class="header-bar__titles">
             <h1 class="header-bar__title">Earthquake Vibration Detector</h1>
+            <p class="header-bar__subtitle">Live monitoring dashboard using ESP32 + Firebase</p>
           </div>
         </a>
 
@@ -72,7 +73,7 @@
         <nav class="header-bar__nav" id="headerPrimaryNav" aria-label="Primary dashboard">
           <ul class="header-bar__nav-list">
             <li>
-              <a class="header-bar__nav-link is-active" href="index.html" data-nav-target="top">Dashboard</a>
+              <a class="header-bar__nav-link" href="index.html" data-nav-target="top">Dashboard</a>
             </li>
             <li>
               <a class="header-bar__nav-link" href="live-data.html" data-nav-target="live-data">Live Data</a>
@@ -87,7 +88,7 @@
               <a class="header-bar__nav-link" href="history.html" data-nav-target="history">History</a>
             </li>
             <li>
-              <a class="header-bar__nav-link" href="about.html" data-nav-target="about">About</a>
+              <a class="header-bar__nav-link is-active" href="about.html" data-nav-target="about">About</a>
             </li>
           </ul>
         </nav>
@@ -165,43 +166,73 @@
   </header>
 
   <div class="container" id="top">
-    <h1 class="page-main-title">Dashboard</h1>
-    <p class="chart-subtitle" style="margin-top: -0.5rem; margin-bottom: 1.25rem">
-      Current readings from Firebase live path. Open <a href="alerts.html">Alerts</a> for the status banner or
-      <a href="live-data.html">Live Data</a> for the rolling chart.
-    </p>
+    <h1 class="page-main-title">About</h1>
 
-    <section class="cards" aria-label="Current sensor readings">
-      <div class="card">
-        <h3>Current Level</h3>
-        <p id="level" class="value safe">SAFE</p>
-      </div>
+    <div class="about-stack">
+      <section class="nav-target-section" id="about" aria-labelledby="about-heading">
+        <h2 class="nav-target-section__title" id="about-heading">About this dashboard</h2>
+        <p class="nav-target-section__text">
+          This site is split into separate pages: <strong>Dashboard</strong> for current readings,
+          <strong>Live Data</strong> for the rolling chart, <strong>Analytics</strong> for history-based charts,
+          <strong>Alerts</strong> for the status banner, <strong>History</strong> for the event table, and this page.
+          Data comes from Firebase Realtime Database (live and history paths) for device
+          <strong id="aboutDeviceId">esp32_01</strong>.
+        </p>
+      </section>
 
-      <div class="card">
-        <h3>Status</h3>
-        <p id="status" class="value-text">NO VIBRATION</p>
-      </div>
+      <section class="nav-target-section" aria-labelledby="about-project-heading">
+        <h2 class="nav-target-section__title" id="about-project-heading">🌍 About the Project</h2>
+        <div class="about-prose">
+          <p>
+            Earthquake Vibration Monitoring System is an embedded-based solution designed to detect, measure, and
+            analyze ground vibrations caused by seismic activity in real time. The system aims to provide early
+            awareness of potential earthquakes by continuously monitoring vibrations using sensitive sensors.
+          </p>
+          <p>
+            This project utilizes embedded hardware components such as microcontrollers and vibration sensors to
+            capture ground motion data. The collected data is processed and can be displayed or transmitted to a
+            monitoring interface for further analysis.
+          </p>
+          <p>
+            The main objective of this system is to enhance safety by enabling faster detection of abnormal seismic
+            vibrations, which can help in minimizing damage and improving emergency response times.
+          </p>
+        </div>
+      </section>
 
-      <div class="card">
-        <h3>Vibration</h3>
-        <p id="vibration" class="value-text">SAFE</p>
-      </div>
+      <section class="nav-target-section" aria-labelledby="about-features-heading">
+        <h2 class="nav-target-section__title" id="about-features-heading">⚙️ Key Features</h2>
+        <ul class="about-list">
+          <li>Real-time vibration detection</li>
+          <li>High-sensitivity seismic sensing</li>
+          <li>Embedded microcontroller-based processing</li>
+          <li>Alert system for abnormal vibrations</li>
+          <li>Data monitoring and logging capability</li>
+        </ul>
+      </section>
 
-      <div class="card">
-        <h3>Trigger Count</h3>
-        <p id="triggerCount" class="value-number">0</p>
-      </div>
+      <section class="nav-target-section" aria-labelledby="about-purpose-heading">
+        <h2 class="nav-target-section__title" id="about-purpose-heading">🎯 Purpose</h2>
+        <p class="nav-target-section__text">
+          The purpose of this project is to develop a low-cost, reliable, and efficient earthquake monitoring system
+          that can be deployed in vulnerable areas to improve early warning capabilities.
+        </p>
+      </section>
 
-      <div class="card">
-        <h3>Total Event Count</h3>
-        <p id="totalCount" class="value-number">0</p>
-      </div>
-
-      <div class="card">
-        <h3>Updated At</h3>
-        <p id="updatedAt" class="value-small">-</p>
-      </div>
-    </section>
+      <section class="nav-target-section" aria-labelledby="about-tech-heading">
+        <h2 class="nav-target-section__title" id="about-tech-heading">🛠️ Technologies Used</h2>
+        <ul class="about-list">
+          <li>Embedded Systems (e.g., Arduino / Microcontroller)</li>
+          <li>Vibration Sensor / Accelerometer</li>
+          <li>Signal Processing</li>
+          <li>IoT (optional, if you added connectivity)</li>
+        </ul>
+        <p class="about-tech-note">
+          This build uses IoT connectivity: an ESP32 sends data to Firebase Realtime Database, and this web dashboard
+          provides live monitoring, alerts, analytics, and history.
+        </p>
+      </section>
+    </div>
   </div>
 
   <script>

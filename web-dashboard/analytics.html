@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | Earthquake Monitor</title>
+  <title>Analytics | Earthquake Monitor</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,7 +34,7 @@
 
   <script type="module" src="firebase-init.js"></script>
 </head>
-<body data-page="dashboard">
+<body data-page="analytics">
   <div class="page-bg" aria-hidden="true"></div>
 
   <header class="header-bar" data-header-bar>
@@ -54,6 +54,7 @@
           </div>
           <div class="header-bar__titles">
             <h1 class="header-bar__title">Earthquake Vibration Detector</h1>
+            <p class="header-bar__subtitle">Live monitoring dashboard using ESP32 + Firebase</p>
           </div>
         </a>
 
@@ -72,13 +73,13 @@
         <nav class="header-bar__nav" id="headerPrimaryNav" aria-label="Primary dashboard">
           <ul class="header-bar__nav-list">
             <li>
-              <a class="header-bar__nav-link is-active" href="index.html" data-nav-target="top">Dashboard</a>
+              <a class="header-bar__nav-link" href="index.html" data-nav-target="top">Dashboard</a>
             </li>
             <li>
               <a class="header-bar__nav-link" href="live-data.html" data-nav-target="live-data">Live Data</a>
             </li>
             <li>
-              <a class="header-bar__nav-link" href="analytics.html" data-nav-target="analytics">Analytics</a>
+              <a class="header-bar__nav-link is-active" href="analytics.html" data-nav-target="analytics">Analytics</a>
             </li>
             <li>
               <a class="header-bar__nav-link" href="alerts.html" data-nav-target="alerts">Alerts</a>
@@ -165,41 +166,37 @@
   </header>
 
   <div class="container" id="top">
-    <h1 class="page-main-title">Dashboard</h1>
-    <p class="chart-subtitle" style="margin-top: -0.5rem; margin-bottom: 1.25rem">
-      Current readings from Firebase live path. Open <a href="alerts.html">Alerts</a> for the status banner or
-      <a href="live-data.html">Live Data</a> for the rolling chart.
-    </p>
+    <h1 class="page-main-title">Analytics</h1>
 
-    <section class="cards" aria-label="Current sensor readings">
-      <div class="card">
-        <h3>Current Level</h3>
-        <p id="level" class="value safe">SAFE</p>
+    <section class="analytics-section" id="analytics" aria-labelledby="analytics-heading">
+      <div class="section-header">
+        <h2 id="analytics-heading">Charts</h2>
       </div>
-
-      <div class="card">
-        <h3>Status</h3>
-        <p id="status" class="value-text">NO VIBRATION</p>
-      </div>
-
-      <div class="card">
-        <h3>Vibration</h3>
-        <p id="vibration" class="value-text">SAFE</p>
-      </div>
-
-      <div class="card">
-        <h3>Trigger Count</h3>
-        <p id="triggerCount" class="value-number">0</p>
-      </div>
-
-      <div class="card">
-        <h3>Total Event Count</h3>
-        <p id="totalCount" class="value-number">0</p>
-      </div>
-
-      <div class="card">
-        <h3>Updated At</h3>
-        <p id="updatedAt" class="value-small">-</p>
+      <p class="chart-subtitle">
+        Summaries from recent Firebase history for this device (updates when history changes).
+      </p>
+      <div class="analytics-grid">
+        <article class="analytics-card">
+          <h3 class="analytics-card__title">Level distribution</h3>
+          <p class="analytics-card__hint">Share of readings by severity</p>
+          <div class="chart-panel chart-panel--compact">
+            <canvas id="levelDistributionChart" role="img" aria-label="Doughnut chart of level distribution"></canvas>
+          </div>
+        </article>
+        <article class="analytics-card">
+          <h3 class="analytics-card__title">Vibration state</h3>
+          <p class="analytics-card__hint">On vs off in recent history</p>
+          <div class="chart-panel chart-panel--compact">
+            <canvas id="vibrationStateChart" role="img" aria-label="Doughnut chart of vibration on versus off"></canvas>
+          </div>
+        </article>
+        <article class="analytics-card analytics-card--wide">
+          <h3 class="analytics-card__title">Trigger counts (latest events)</h3>
+          <p class="analytics-card__hint">Ten most recent stored events, oldest to newest</p>
+          <div class="chart-panel chart-panel--bar">
+            <canvas id="historyTriggersChart" role="img" aria-label="Bar chart of trigger counts for recent events"></canvas>
+          </div>
+        </article>
       </div>
     </section>
   </div>
