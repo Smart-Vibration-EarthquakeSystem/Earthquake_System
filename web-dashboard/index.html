@@ -188,6 +188,11 @@
       </div>
 
       <div class="card">
+        <h3>Vibration Value</h3>
+        <p id="vibrationValue" class="value-number">0</p>
+      </div>
+
+      <div class="card">
         <h3>Trigger Count</h3>
         <p id="triggerCount" class="value-number">0</p>
       </div>
@@ -200,6 +205,18 @@
       <div class="card">
         <h3>Updated At</h3>
         <p id="updatedAt" class="value-small">-</p>
+      </div>
+    </section>
+
+    <section class="chart-section" aria-labelledby="dashboard-vibration-chart-heading">
+      <div class="section-header">
+        <h2 id="dashboard-vibration-chart-heading">Vibration Value Over Time</h2>
+      </div>
+      <p class="chart-subtitle">
+        Live vibration value readings from Firebase plotted against time.
+      </p>
+      <div class="chart-panel chart-panel--vibration">
+        <canvas id="vibrationValueChart" role="img" aria-label="Live chart of vibration value over time"></canvas>
       </div>
     </section>
   </div>

@@ -73,6 +73,7 @@ function coerceHistoryObject(raw) {
 
 const liveSeries = [];
 let liveChart = null;
+let vibrationValueChart = null;
 let levelDistChart = null;
 let vibrationStateChart = null;
 let historyTriggersChart = null;
@@ -161,6 +162,15 @@ function syncLiveChartData() {
   }));
 }
 
+function syncVibrationValueChartData() {
+  if (!vibrationValueChart) return;
+
+  vibrationValueChart.data.datasets[0].data = liveSeries.map((p) => ({
+    x: p.t,
+    y: Number(p.vibValue ?? 0),
+  }));
+}
+
 function applyLiveChartTheme() {
   if (!liveChart) return;
 
@@ -189,6 +199,42 @@ function applyLiveChartTheme() {
   liveChart.options.plugins.legend.labels.color = muted;
 
   liveChart.update("none");
+}
+
+function applyVibrationValueChartTheme() {
+  if (!vibrationValueChart) return;
+
+  const { accent, grid, muted } = getLiveChartColors();
+  const ds0 = vibrationValueChart.data.datasets[0];
+  if (ds0) {
+    ds0.borderColor = accent;
+    ds0.backgroundColor = (ctx) => {
+      const { chart } = ctx;
+      const { ctx: c, chartArea } = chart;
+      if (!chartArea) return withAlpha(accent, 0.12);
+      const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+      gradient.addColorStop(0, withAlpha(accent, 0.26));
+      gradient.addColorStop(1, withAlpha(accent, 0.02));
+      return gradient;
+    };
+    ds0.pointBackgroundColor = accent;
+    ds0.pointBorderColor = accent;
+  }
+
+  const scales = vibrationValueChart.options.scales;
+  if (scales?.x) {
+    scales.x.grid.color = grid;
+    scales.x.ticks.color = muted;
+    if (scales.x.title) scales.x.title.color = muted;
+  }
+  if (scales?.y) {
+    scales.y.grid.color = grid;
+    scales.y.ticks.color = muted;
+    if (scales.y.title) scales.y.title.color = muted;
+  }
+
+  vibrationValueChart.options.plugins.legend.labels.color = muted;
+  vibrationValueChart.update("none");
 }
 
 function getLevelDoughnutColors() {
@@ -600,6 +646,137 @@ function createLiveChart(Chart) {
   });
 }
 
+function createVibrationValueChart(Chart) {
+  const canvas = getEl("vibrationValueChart");
+  if (!canvas || typeof Chart !== "function") return;
+
+  const { accent, grid, muted } = getLiveChartColors();
+
+  vibrationValueChart = new Chart(canvas, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: "Vibration Value",
+          data: [],
+          tension: 0.38,
+          cubicInterpolationMode: "monotone",
+          fill: true,
+          pointRadius(ctx) {
+            const i = ctx.dataIndex;
+            const n = ctx.dataset.data?.length ?? 0;
+            return i === n - 1 ? 4.5 : 2.5;
+          },
+          pointHoverRadius: 7,
+          pointBorderWidth(ctx) {
+            const i = ctx.dataIndex;
+            const n = ctx.dataset.data?.length ?? 0;
+            return i === n - 1 ? 2 : 1;
+          },
+          borderWidth: 2.5,
+          borderColor: accent,
+          backgroundColor: (ctx) => {
+            const { chart } = ctx;
+            const { ctx: c, chartArea } = chart;
+            if (!chartArea) return withAlpha(accent, 0.12);
+            const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, withAlpha(accent, 0.26));
+            gradient.addColorStop(1, withAlpha(accent, 0.02));
+            return gradient;
+          },
+          pointBackgroundColor: accent,
+          pointBorderColor: accent,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 550, easing: "easeOutQuart" },
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          position: "top",
+          align: "end",
+          labels: {
+            color: muted,
+            boxWidth: 10,
+            boxHeight: 10,
+            usePointStyle: true,
+            padding: 16,
+            font: { size: 12, family: "'DM Sans', system-ui, sans-serif" },
+          },
+        },
+        tooltip: {
+          backgroundColor: withAlpha("#0f172a", 0.9),
+          borderColor: withAlpha(accent, 0.35),
+          borderWidth: 1,
+          cornerRadius: 10,
+          padding: 10,
+          callbacks: {
+            title(items) {
+              const x = items[0]?.parsed?.x;
+              return x != null ? new Date(x).toLocaleString() : "";
+            },
+            label(item) {
+              const y = Number(item?.parsed?.y ?? 0);
+              return ` Vibration Value: ${y.toFixed(2)}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          title: {
+            display: true,
+            text: "Time",
+            color: muted,
+            font: { size: 11, weight: "600" },
+          },
+          grid: {
+            color: withAlpha(grid, 0.75),
+            tickLength: 0,
+          },
+          ticks: {
+            color: muted,
+            maxTicksLimit: 7,
+            maxRotation: 0,
+            callback(value) {
+              return new Date(value).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+              });
+            },
+          },
+        },
+        y: {
+          beginAtZero: true,
+          grace: "12%",
+          title: {
+            display: true,
+            text: "Vibration Value",
+            color: muted,
+            font: { size: 11, weight: "600" },
+          },
+          grid: {
+            color: withAlpha(grid, 0.75),
+            tickLength: 0,
+          },
+          ticks: {
+            color: muted,
+            precision: 0,
+            callback(value) {
+              return Number(value).toFixed(0);
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 function formatUnixTime(unixTime) {
   if (!unixTime || Number(unixTime) === 0) return "-";
   const date = new Date(Number(unixTime) * 1000);
@@ -665,6 +842,34 @@ function vibrationToBinary(vibration, level) {
   return 0;
 }
 
+function toFiniteNumber(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function resolveVibrationValue(data) {
+  const directCandidates = [
+    data?.vibrationValue,
+    data?.vibration_value,
+    data?.vibrationRaw,
+    data?.vibrationAnalog,
+    data?.sensorValue,
+    data?.sensor_value,
+    data?.value,
+  ];
+
+  for (const c of directCandidates) {
+    if (c != null && String(c).trim() !== "") return toFiniteNumber(c, 0);
+  }
+
+  const nestedCandidates = [data?.vibration?.value, data?.vibration?.raw, data?.sensor?.vibrationValue];
+  for (const c of nestedCandidates) {
+    if (c != null && String(c).trim() !== "") return toFiniteNumber(c, 0);
+  }
+
+  return 0;
+}
+
 function normalizeLiveRecord(data) {
   const level = normalizeLevel(data?.currentLevel);
   return {
@@ -676,7 +881,7 @@ function normalizeLiveRecord(data) {
     triggerCount: Number(data?.triggerCount5s ?? data?.triggerCount ?? 0),
     totalCount: Number(data?.totalEventCount ?? data?.totalCount ?? 0),
     updatedAt: Number(data?.updatedAt ?? data?.timestamp ?? 0),
-    vibrationValue: Number(data?.vibrationValue ?? 0),
+    vibrationValue: resolveVibrationValue(data),
   };
 }
 
@@ -691,17 +896,18 @@ function normalizeHistoryRecord(data) {
     triggerCount: Number(data?.triggerCount5s ?? data?.triggerCount ?? 0),
     totalCount: Number(data?.totalEventCount ?? data?.totalCount ?? 0),
     updatedAt: Number(data?.updatedAt ?? data?.timestamp ?? 0),
-    vibrationValue: Number(data?.vibrationValue ?? 0),
+    vibrationValue: resolveVibrationValue(data),
   };
 }
 
 function appendLiveSample(item) {
-  if (!liveChart) return;
+  if (!liveChart && !vibrationValueChart) return;
 
   const updatedSec = Number(item.updatedAt ?? 0);
   const t = updatedSec > 0 ? updatedSec * 1000 : Date.now();
   const trigger = Number(item.triggerCount ?? 0);
   const vib = Number(item.vibrationBinary) === 1 ? 1 : 0;
+  const vibValue = Number(item.vibrationValue ?? 0);
   const last = liveSeries[liveSeries.length - 1];
 
   if (last) {
@@ -713,8 +919,11 @@ function appendLiveSample(item) {
       last.updatedSec = updatedSec;
       last.trigger = trigger;
       last.vib = vib;
+      last.vibValue = vibValue;
       syncLiveChartData();
+      syncVibrationValueChartData();
       liveChart?.update("none");
+      vibrationValueChart?.update("none");
       return;
     }
   }
@@ -724,6 +933,7 @@ function appendLiveSample(item) {
     updatedSec,
     trigger,
     vib,
+    vibValue,
   });
 
   while (liveSeries.length > LIVE_CHART_MAX_POINTS) {
@@ -731,7 +941,9 @@ function appendLiveSample(item) {
   }
 
   syncLiveChartData();
+  syncVibrationValueChartData();
   liveChart?.update();
+  vibrationValueChart?.update();
 }
 
 function makeHistoryKey(item) {
@@ -779,6 +991,7 @@ function renderLatest(item) {
   const levelEl = getEl("level");
   const statusEl = getEl("status");
   const vibrationEl = getEl("vibration");
+  const vibrationValueEl = getEl("vibrationValue");
   const triggerEl = getEl("triggerCount");
   const totalEl = getEl("totalCount");
   const updatedEl = getEl("updatedAt");
@@ -792,6 +1005,7 @@ function renderLatest(item) {
 
   if (statusEl) statusEl.textContent = item.status;
   if (vibrationEl) vibrationEl.textContent = item.vibrationText;
+  if (vibrationValueEl) vibrationValueEl.textContent = Number(item.vibrationValue ?? 0);
   if (triggerEl) triggerEl.textContent = item.triggerCount;
   if (totalEl) totalEl.textContent = item.totalCount;
   if (updatedEl) updatedEl.textContent = formatUnixTime(item.updatedAt);
@@ -817,7 +1031,7 @@ function renderHistory(historyData) {
 
   const map = coerceHistoryObject(historyData);
   if (!map || typeof map !== "object") {
-    table.innerHTML = `<tr><td colspan="7">No history available</td></tr>`;
+    table.innerHTML = `<tr><td colspan="8">No history available</td></tr>`;
     updateAnalyticsCharts(historyData);
     return;
   }
@@ -832,7 +1046,7 @@ function renderHistory(historyData) {
     .slice(0, 10);
 
   if (entries.length === 0) {
-    table.innerHTML = `<tr><td colspan="7">No history available</td></tr>`;
+    table.innerHTML = `<tr><td colspan="8">No history available</td></tr>`;
     updateAnalyticsCharts(historyData);
     return;
   }
@@ -844,6 +1058,7 @@ function renderHistory(historyData) {
         <td><span class="${getBadgeClass(item.level)}">${item.level}</span></td>
         <td>${item.status}</td>
         <td>${item.vibrationText}</td>
+        <td>${Number(item.vibrationValue ?? 0)}</td>
         <td>${item.triggerCount}</td>
         <td>${item.totalCount}</td>
         <td>${formatUnixTime(item.updatedAt)}</td>
@@ -861,8 +1076,10 @@ async function initChart() {
       "https://cdn.jsdelivr.net/npm/chart.js@4.4.8/auto/+esm"
     );
     createLiveChart(Chart);
+    createVibrationValueChart(Chart);
     createAnalyticsCharts(Chart);
     applyLiveChartTheme();
+    applyVibrationValueChartTheme();
     applyAnalyticsChartsTheme();
   } catch (err) {
     console.warn("Chart.js could not load; charts disabled.", err);
